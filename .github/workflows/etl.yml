@@ -19,7 +19,17 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run ETL
+        - name: Run ETL CO2
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: python etl/etl_co2.py
+
+      - name: Run ETL Temperature
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python etl/etl_temperature.py
+
+      - name: Run ETL Sea Level
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python etl/etl_sea_level.py
