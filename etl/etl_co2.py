@@ -4,32 +4,31 @@ import psycopg2
 import os
 from io import StringIO
 
-# Scarica il file NOAA
+# Scarica il CSV CO2 da NOAA
 url = "https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_mm_mlo.csv"
 response = requests.get(url)
 csv_raw = StringIO(response.text)
 
-# Leggi il file CSV, salta i commenti
+# Leggi e prepara il DataFrame
 df = pd.read_csv(csv_raw, comment='#', header=None,
                  names=["year", "month", "decimal_date", "average", "interpolated", "trend", "days_missing"])
 
-# 🔧 Forza conversione numerica (fix del bug)
-cols_to_numeric = ["average", "interpolated", "trend", "days_missing"]
-df[cols_to_numeric] = df[cols_to_numeric].apply(pd.to_numeric, errors="coerce")
-
-# Filtra solo righe valide (average > 0)
+# Forza conversione numerica per evitare errori
+cols = ["average", "interpolated", "trend", "days_missing"]
+df[cols] = df[cols].apply(pd.to_numeric, errors="coerce")
 df = df[df["average"] > 0]
 
-# Connessione a Supabase PostgreSQL (via GitHub secrets)
+# Connessione a Supabase tramite Transaction Pooler (porta 6543)
 conn = psycopg2.connect(
     host=os.environ["DB_HOST"],
     dbname=os.environ["DB_NAME"],
     user=os.environ["DB_USER"],
     password=os.environ["DB_PASS"],
-    port=5432
+    port=int(os.environ.get("DB_PORT", 6543)),  # fallback: 6543
+    sslmode="require"
 )
 
-# Inserimento righe (senza duplicati)
+# Inserimento nel database
 sql = """
     INSERT INTO climate_co2_data (year, month, average_ppm, interpolated_ppm, trend_ppm, days_missing)
     VALUES (%s, %s, %s, %s, %s, %s)
@@ -46,4 +45,4 @@ for _, r in df.iterrows():
 conn.commit()
 cur.close()
 conn.close()
-print("✅ Supabase updated")
+print("✅ Supabase updated with CO2 data")
