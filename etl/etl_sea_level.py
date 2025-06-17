@@ -7,22 +7,22 @@ from io import StringIO
 
 print("🌊 ETL Sea Level avviato")
 
-# 📦 Fonte NOAA/CSIRO stabile
-url = "https://www.cmar.csiro.au/sealevel/sl_data_monthly.csv"
+# ✅ NOAA/NCEI fonte stabile
+url = "https://www.ncei.noaa.gov/access/global-sea-level-rise/data/2022_rel/GMSL_TPJAOS_5.1_1993_2021.csv"
 response = requests.get(url)
 response.raise_for_status()
 
-# 📄 Parsing
-df = pd.read_csv(StringIO(response.text), skiprows=1, names=["date", "level_change_mm"])
+df = pd.read_csv(StringIO(response.text), skiprows=1, names=["decimal_year", "level_mm", "uncertainty_mm"])
 df.dropna(inplace=True)
 
-# Estrai anno e mese
-df["year"] = df["date"].str.slice(0, 4).astype(int)
-df["month"] = df["date"].str.slice(5, 7).astype(int)
-df["level_change_mm"] = pd.to_numeric(df["level_change_mm"], errors="coerce")
-df.dropna(subset=["level_change_mm"], inplace=True)
+# Estrai anno e mese da 'decimal_year'
+df["year"] = df["decimal_year"].astype(int)
+df["month"] = ((df["decimal_year"] - df["year"]) * 12 + 1).round().astype(int)
 
-# 🔗 Connessione Supabase
+df["level_mm"] = pd.to_numeric(df["level_mm"], errors="coerce")
+df.dropna(subset=["level_mm"], inplace=True)
+
+# 🔌 Connessione a Supabase
 DATABASE_URL = os.environ["DATABASE_URL"]
 print("🔌 Connessione al database...")
 conn = psycopg2.connect(DATABASE_URL)
@@ -35,10 +35,10 @@ for _, row in df.iterrows():
         INSERT INTO sea_level_data (year, month, level_change_mm)
         VALUES (%s, %s, %s)
         ON CONFLICT DO NOTHING;
-    """, (row["year"], row["month"], row["level_change_mm"]))
+    """, (row["year"], row["month"], row["level_mm"]))
 
 conn.commit()
 cur.close()
 conn.close()
 
-print("✅ ETL completato – Dati livello mare caricati")
+print("✅ ETL completato – Dati livello mare aggiornati")
