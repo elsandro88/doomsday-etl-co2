@@ -1,6 +1,6 @@
 
 
-print("🔍 Connecting to:", os.environ["DB_HOST"])
+
 
 import pandas as pd
 import requests
@@ -8,6 +8,7 @@ import psycopg2
 import os
 from io import StringIO
 
+print("🔍 Connecting to:", os.environ["DB_HOST"])
 # Scarica i dati CO2
 url = "https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_mm_mlo.csv"
 response = requests.get(url)
