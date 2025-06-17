@@ -11,7 +11,8 @@ csv_raw = StringIO(response.text)
 
 # 🔢 Leggi e assegna nomi colonne
 df = pd.read_csv(csv_raw, comment='#', header=None)
-df.columns = ["year", "month", "decimal_date", "average", "interpolated", "trend", "days_missing"]
+df.columns = ["year", "month", "decimal_date", "average", "interpolated", "trend", "days_missing", "uncorrected_avg"]
+
 
 # 🧹 Conversione sicura dei tipi
 cols = ["year", "month", "average", "interpolated", "trend", "days_missing"]
