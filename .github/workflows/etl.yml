@@ -29,7 +29,9 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: python etl/etl_temperature.py
 
-      - name: Run ETL Sea Level
+      - name: Run Energy Mix ETL
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: python etl/etl_sea_level.py
+          ELECTRICITYMAP_API_KEY: ${{ secrets.ELECTRICITYMAP_API_KEY }}
+        run: python etl/etl_energy_mix.py
+
