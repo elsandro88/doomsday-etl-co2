@@ -1,3 +1,5 @@
+print("🔍 Connecting to:", os.environ["DB_HOST"])
+
 import pandas as pd
 import requests
 import psycopg2
