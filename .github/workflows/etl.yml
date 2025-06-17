@@ -18,8 +18,8 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
-
-        - name: Run ETL CO2
+      
+      - name: Run ETL
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: python etl/etl_co2.py
