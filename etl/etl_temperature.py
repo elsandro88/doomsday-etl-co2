@@ -18,7 +18,8 @@ df = pd.read_csv(StringIO(response.text), skiprows=1)
 # Pulizia: melting del DataFrame per ottenere righe singole per mese
 df = df.melt(id_vars=["Year"], var_name="month", value_name="anomaly_celsius")
 df.dropna(inplace=True)
-df["anomaly_celsius"] = df["anomaly_celsius"].astype(float)
+df["anomaly_celsius"] = pd.to_numeric(df["anomaly_celsius"], errors="coerce")
+df.dropna(subset=["anomaly_celsius"], inplace=True)
 df["month"] = df["month"].str.strip().str[:3]
 
 # Mapping da stringa a numero
