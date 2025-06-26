@@ -19,11 +19,6 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run Energy Mix ETL
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          ELECTRICITYMAP_API_KEY: ${{ secrets.ELECTRICITYMAP_API_KEY }}
-        run: python etl/etl_energy_mix.py
         
       - name: Run ETL CO2
         env:
